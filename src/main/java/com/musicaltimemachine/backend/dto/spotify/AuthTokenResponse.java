@@ -1,4 +1,4 @@
-package com.musicaltimemachine.backend.model.spotify;
+package com.musicaltimemachine.backend.dto.spotify;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

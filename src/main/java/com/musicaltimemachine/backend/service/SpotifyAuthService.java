@@ -1,6 +1,6 @@
 package com.musicaltimemachine.backend.service;
 
-import com.musicaltimemachine.backend.model.spotify.AuthTokenResponse;
+import com.musicaltimemachine.backend.dto.spotify.AuthTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
