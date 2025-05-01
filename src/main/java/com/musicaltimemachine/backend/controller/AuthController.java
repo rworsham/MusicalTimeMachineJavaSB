@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpSession;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -42,8 +43,9 @@ public class AuthController {
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<String> callback(@RequestParam("code") String code) {
+    public ResponseEntity<String> callback(@RequestParam("code") String code, HttpSession session) {
         String accessToken = spotifyAuthService.exchangeCodeForAccessToken(code);
-        return ResponseEntity.ok("Access token: " + accessToken);
+        session.setAttribute("spotifyAccessToken", accessToken);
+        return ResponseEntity.ok("Access token saved in session.");
     }
 }

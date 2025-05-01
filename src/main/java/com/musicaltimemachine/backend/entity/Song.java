@@ -15,15 +15,18 @@ public class Song {
 
     private String artist;
 
+    private String uri;
+
     @Column(nullable = false)
     private LocalDate chartDate;
 
     public Song() {
     }
 
-    public Song(String title, String artist, LocalDate chartDate) {
+    public Song(String title, String artist, String uri, LocalDate chartDate) {
         this.title = title;
         this.artist = artist;
+        this.uri = uri;
         this.chartDate = chartDate;
     }
 
@@ -49,6 +52,14 @@ public class Song {
 
     public void setArtist(String artist) {
         this.artist = artist;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     public LocalDate getChartDate() {
