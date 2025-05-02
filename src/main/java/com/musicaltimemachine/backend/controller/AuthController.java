@@ -29,7 +29,9 @@ public class AuthController {
 
     @GetMapping("/login")
     public ResponseEntity<Void> login() {
-        String scopes = URLEncoder.encode("user-read-private user-read-email playlist-read-private", StandardCharsets.UTF_8);
+        String scopes = URLEncoder.encode
+                ("user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private",
+                StandardCharsets.UTF_8);
         String redirect = URLEncoder.encode(redirectUri, StandardCharsets.UTF_8);
 
         String authUrl = "https://accounts.spotify.com/authorize" +

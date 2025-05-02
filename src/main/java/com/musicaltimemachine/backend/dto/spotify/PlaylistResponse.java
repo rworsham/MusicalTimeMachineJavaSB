@@ -1,4 +1,11 @@
 package com.musicaltimemachine.backend.dto.spotify;
 
-public record PlaylistResponse() {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record PlaylistResponse(
+        String id,
+        String name,
+        @JsonProperty("external_urls") ExternalUrls externalUrls
+) {
+    public record ExternalUrls(String spotify) {}
 }

@@ -1,5 +1,6 @@
 package com.musicaltimemachine.backend.controller;
 
+import com.musicaltimemachine.backend.dto.spotify.PlaylistResponse;
 import com.musicaltimemachine.backend.service.SpotifyPlaylistService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.*;
@@ -20,16 +21,19 @@ public class PlaylistController {
     }
 
     @GetMapping("/playlist")
-    public ResponseEntity<String> playlist(@RequestParam("date") String date, HttpSession session) {
+    public ResponseEntity<PlaylistResponse> playlist(
+            @RequestParam("date") String date,
+            @RequestParam("isPublic") Boolean isPublic,
+            HttpSession session
+    ) {
         String accessToken = (String) session.getAttribute("spotifyAccessToken");
 
         if (accessToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Spotify access token not found");
+                    .build();
         }
 
-        String playlistData = spotifyPlaylistService.createPlaylistForDate(accessToken, date);
-
-        return ResponseEntity.ok(playlistData);
+        PlaylistResponse playlist = spotifyPlaylistService.createPlaylistForDate(accessToken, date, isPublic);
+        return ResponseEntity.ok(playlist);
     }
 }
