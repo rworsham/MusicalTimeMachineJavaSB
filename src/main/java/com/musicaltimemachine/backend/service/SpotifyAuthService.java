@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import java.time.Instant;
 import java.util.Base64;
+
 
 @Service
 public class SpotifyAuthService {
@@ -18,6 +20,9 @@ public class SpotifyAuthService {
 
     @Value("${spotify.redirect-uri}")
     private String redirectUri;
+
+    private String cachedAccessToken;
+    private Instant tokenExpirationTime;
 
     private final RestTemplate restTemplate;
 
@@ -51,6 +56,40 @@ public class SpotifyAuthService {
         }
 
         return tokenResponse.accessToken();
+    }
+
+    public String getClientAccessToken() {
+        if (cachedAccessToken != null &&
+                tokenExpirationTime != null &&
+                Instant.now().isBefore(tokenExpirationTime)) {
+            return cachedAccessToken;
+        }
+
+        String tokenUrl = "https://accounts.spotify.com/api/token";
+
+        String requestBody = "grant_type=client_credentials";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set("Authorization", "Basic " + encodeClientCredentials());
+
+        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<AuthTokenResponse> response = restTemplate.exchange(
+                tokenUrl,
+                HttpMethod.POST,
+                entity,
+                AuthTokenResponse.class
+        );
+
+        AuthTokenResponse tokenResponse = response.getBody();
+        if (tokenResponse == null) {
+            throw new RuntimeException("No token returned from Spotify");
+        }
+        cachedAccessToken = tokenResponse.accessToken();
+        tokenExpirationTime = Instant.now().plusSeconds(tokenResponse.expiresIn() - 60);
+
+        return cachedAccessToken;
     }
 
     private String encodeClientCredentials() {

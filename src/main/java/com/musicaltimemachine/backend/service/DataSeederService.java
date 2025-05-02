@@ -6,21 +6,36 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import org.springframework.http.MediaType;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
 public class DataSeederService {
 
     private final SongRepository songRepository;
+    private final SpotifyAuthService spotifyAuthService;
+    private final RestTemplate restTemplate;
 
     @Autowired
-    public DataSeederService(SongRepository songRepository) {
+    public DataSeederService(SongRepository songRepository, SpotifyAuthService spotifyAuthService, RestTemplate restTemplate) {
         this.songRepository = songRepository;
+        this.spotifyAuthService = spotifyAuthService;
+        this.restTemplate = restTemplate;
     }
 
     public void seedBillboardData() {
@@ -54,7 +69,9 @@ public class DataSeederService {
                     String title = songElements.get(i).text().trim();
                     String artist = artistElements.get(i).text().trim();
 
-                    Song song = new Song(title, artist, current);
+                    String uri = getUriFromSpotify(title, artist);
+
+                    Song song = new Song(title, artist, uri, current);
                     songs.add(song);
                 }
 
@@ -73,5 +90,37 @@ public class DataSeederService {
 
             current = current.plusWeeks(1);
         }
+    }
+
+    private String getUriFromSpotify(String title, String artist) {
+        try {
+            String accessToken = spotifyAuthService.getClientAccessToken();
+
+            String query = String.format("track:%s artist:%s", title, artist);
+            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+            String url = "https://api.spotify.com/v1/search?q=" + encodedQuery + "&type=track&limit=1";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    String.class
+            );
+
+            JsonNode root = new ObjectMapper().readTree(response.getBody());
+            JsonNode uriNode = root.path("tracks").path("items").path(0).path("uri");
+
+            return uriNode.isMissingNode() ? null : uriNode.asText();
+        } catch (Exception e) {
+            System.err.println("Failed to fetch URI from Spotify for '" + title + "' by '" + artist + "': " + e.getMessage());
+        }
+
+        return null;
     }
 }
