@@ -48,6 +48,9 @@ public class AuthController {
     public ResponseEntity<String> callback(@RequestParam("code") String code, HttpSession session) {
         String accessToken = spotifyAuthService.exchangeCodeForAccessToken(code);
         session.setAttribute("spotifyAccessToken", accessToken);
-        return ResponseEntity.ok("Access token saved in session.");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(java.net.URI.create("http://localhost:5173/timemachine"));
+        return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();
     }
 }

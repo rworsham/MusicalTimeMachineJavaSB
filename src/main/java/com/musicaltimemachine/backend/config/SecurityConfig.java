@@ -44,7 +44,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/api/admin/login").permitAll()
+                                .requestMatchers("/api/admin/login", "/api/admin/logout", "/api/auth/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .logout(LogoutConfigurer::permitAll
