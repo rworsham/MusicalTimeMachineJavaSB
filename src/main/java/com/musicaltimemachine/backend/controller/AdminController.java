@@ -1,12 +1,19 @@
 package com.musicaltimemachine.backend.controller;
 
+import com.musicaltimemachine.backend.dto.LoginRequest;
 import com.musicaltimemachine.backend.service.DataSeederService;
 import com.musicaltimemachine.backend.service.UserService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -25,23 +32,53 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<?> login(
+            @RequestBody LoginRequest loginRequest,
+            HttpSession session
+    ) {
         try {
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(username, password);
+            UsernamePasswordAuthenticationToken authRequest =
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
 
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            Authentication authentication = authenticationManager.authenticate(authRequest);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            return "Login successful";
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+            return ResponseEntity.ok(Map.of("message", "Login successful"));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid username or password"));
         } catch (Exception e) {
-            return "Authentication failed: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Authentication failed"));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpSession session) {
+        session.invalidate();
+
+        SecurityContextHolder.clearContext();
+
+        return ResponseEntity.ok(Map.of("message", "Logout successful"));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> checkAuthentication() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
+            return ResponseEntity.ok(Map.of("message", "Authenticated", "user", authentication.getName()));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "User not authenticated"));
         }
     }
 
     @PostMapping("/seed-billboard")
-    public String startBillboardSeeding() {
+    public ResponseEntity<?> startBillboardSeeding() {
         dataSeederService.runAsyncSeeding();
-        return "Seeding process started. Check logs for progress.";
+        return ResponseEntity.ok(Map.of("message", "Seeding started check logs for progress"));
     }
 }

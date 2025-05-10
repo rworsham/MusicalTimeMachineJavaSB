@@ -8,22 +8,20 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import org.springframework.http.MediaType;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class DataSeederService {
@@ -54,6 +52,7 @@ public class DataSeederService {
         while (current.isBefore(endDate)) {
             try {
                 if (!songRepository.findByChartDate(current).isEmpty()) {
+                    System.out.println("Skipping " + current + " — already in database.");
                     current = current.plusWeeks(1);
                     continue;
                 }
@@ -101,6 +100,7 @@ public class DataSeederService {
     private String getUriFromSpotify(String title, String artist) {
         try {
             String accessToken = spotifyAuthService.getClientAccessToken();
+            Thread.sleep(1000 + new Random().nextInt(1000));
 
             String query = String.format("track:%s artist:%s", title, artist);
             String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
@@ -123,6 +123,18 @@ public class DataSeederService {
             JsonNode uriNode = root.path("tracks").path("items").path(0).path("uri");
 
             return uriNode.isMissingNode() ? null : uriNode.asText();
+
+        } catch (HttpClientErrorException.TooManyRequests e) {
+            String retryAfter = e.getResponseHeaders().getFirst("Retry-After");
+            long waitSeconds = retryAfter != null ? Long.parseLong(retryAfter) : 5;
+            System.err.println("429 Rate limited by Spotify. Retrying after " + waitSeconds + " seconds.");
+            try {
+                Thread.sleep(waitSeconds * 1000L);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            }
+            return getUriFromSpotify(title, artist);
+
         } catch (Exception e) {
             System.err.println("Failed to fetch URI from Spotify for '" + title + "' by '" + artist + "': " + e.getMessage());
         }
