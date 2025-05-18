@@ -11,6 +11,12 @@ public class RecaptchaResponse {
     @JsonProperty("challenge_ts")
     private String challengeTs;
 
+    @JsonProperty("score")
+    private float score;
+
+    @JsonProperty("action")
+    private String action;
+
     private String hostname;
 
     @JsonProperty("error-codes")
@@ -30,6 +36,22 @@ public class RecaptchaResponse {
 
     public void setChallengeTs(String challengeTs) {
         this.challengeTs = challengeTs;
+    }
+
+    public float getScore() {
+        return score;
+    }
+
+    public void setScore(float score) {
+        this.score = score;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
     }
 
     public String getHostname() {

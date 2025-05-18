@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 @Service
 public class SpotifyPlaylistService {
@@ -27,6 +28,8 @@ public class SpotifyPlaylistService {
 
     public PlaylistResponse createPlaylistForDate(String accessToken, String date, Boolean isPublic) {
         List<String> uris = songRepository.findUrisByChartDate(LocalDate.parse(date));
+
+        Collections.shuffle(uris);
 
         String userId = getCurrentUserSpotifyId(accessToken);
 

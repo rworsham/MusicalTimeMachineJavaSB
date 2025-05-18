@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/api/admin/login", "/api/admin/logout", "/api/auth/**", "/api/playlist").permitAll()
+                                .requestMatchers("/api/admin/login", "/api/admin/logout", "/api/auth/**", "/api/playlist", "/api/contact").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .logout(LogoutConfigurer::permitAll

@@ -2,6 +2,7 @@ package com.musicaltimemachine.backend.controller;
 
 import com.musicaltimemachine.backend.dto.LoginRequest;
 import com.musicaltimemachine.backend.service.DataSeederService;
+import com.musicaltimemachine.backend.service.RecaptchaService;
 import com.musicaltimemachine.backend.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
@@ -19,16 +20,16 @@ import java.util.Map;
 @RequestMapping("/api/admin")
 public class AdminController {
 
-    private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final DataSeederService dataSeederService;
+    private final RecaptchaService recaptchaService;
 
-    public AdminController(UserService userService,
-                           AuthenticationManager authenticationManager,
-                           DataSeederService dataSeederService) {
-        this.userService = userService;
+    public AdminController(AuthenticationManager authenticationManager,
+                           DataSeederService dataSeederService,
+                           RecaptchaService recaptchaService) {
         this.authenticationManager = authenticationManager;
         this.dataSeederService = dataSeederService;
+        this.recaptchaService = recaptchaService;
     }
 
     @PostMapping("/login")
@@ -37,6 +38,13 @@ public class AdminController {
             HttpSession session
     ) {
         try {
+            boolean captchaValid = recaptchaService.verifyCaptcha(loginRequest.getCaptchaToken(), "admin_login_form_submit");
+
+            if (!captchaValid) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "CAPTCHA validation failed"));
+            }
+
             UsernamePasswordAuthenticationToken authRequest =
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
 

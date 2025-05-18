@@ -2,14 +2,8 @@ package com.musicaltimemachine.backend.service;
 
 import com.mailjet.client.ClientOptions;
 import com.musicaltimemachine.backend.dto.ContactRequest;
-import com.musicaltimemachine.backend.dto.RecaptchaResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import com.mailjet.client.MailjetClient;
 import com.mailjet.client.MailjetRequest;
 import com.mailjet.client.MailjetResponse;
@@ -19,9 +13,6 @@ import org.json.JSONObject;
 
 @Service
 public class ContactService {
-
-    @Value("${RECAPTCHA_SECRET}")
-    private String recaptchaSecret;
 
     @Value("${MJ_APIKEY_PUBLIC}")
     private String mailjetApiKey;
@@ -37,12 +28,6 @@ public class ContactService {
 
     @Value("${MAILJET_RECIPIENT_EMAIL}")
     private String recipientEmail;
-
-    private final RestTemplate restTemplate;
-
-    public ContactService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
 
     public String sendEmail(ContactRequest contactRequest) {
         try {
@@ -80,26 +65,5 @@ public class ContactService {
             e.printStackTrace();
             throw new RuntimeException("Error sending email: " + e.getMessage());
         }
-    }
-
-
-    public Boolean verifyCaptcha(String captchaToken) {
-        String requestBody = "secret=" + recaptchaSecret + "&response=" + captchaToken;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
-        ResponseEntity<RecaptchaResponse> response = restTemplate.postForEntity(
-                "https://www.google.com/recaptcha/api/siteverify",
-                entity,
-                RecaptchaResponse.class
-        );
-
-        RecaptchaResponse recaptcha = response.getBody();
-        if (recaptcha != null && recaptcha.isSuccess()) {
-            return true;
-        }
-        return null;
     }
 }
