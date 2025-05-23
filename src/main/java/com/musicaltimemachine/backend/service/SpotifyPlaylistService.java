@@ -18,16 +18,20 @@ public class SpotifyPlaylistService {
 
     private final RestTemplate restTemplate;
     private final SongRepository songRepository;
+    private final PlaylistLogService playlistLogService;
 
     @Autowired
-    public SpotifyPlaylistService(RestTemplate restTemplate, SongRepository songRepository) {
+    public SpotifyPlaylistService(RestTemplate restTemplate, SongRepository songRepository, PlaylistLogService playlistLogService) {
         this.restTemplate = restTemplate;
         this.songRepository = songRepository;
+        this.playlistLogService = playlistLogService;
     }
 
 
     public PlaylistResponse createPlaylistForDate(String accessToken, String date, Boolean isPublic) {
-        List<String> uris = songRepository.findUrisByChartDate(LocalDate.parse(date));
+        LocalDate parsedDate = LocalDate.parse(date);
+
+        List<String> uris = songRepository.findUrisByChartDate(parsedDate);
 
         Collections.shuffle(uris);
 
@@ -64,6 +68,7 @@ public class SpotifyPlaylistService {
 
         HttpEntity<Map<String, Object>> addTracksRequest = new HttpEntity<>(addTracksBody, headers);
         restTemplate.postForEntity(addTracksUrl, addTracksRequest, Void.class);
+        playlistLogService.saveLog(parsedDate, isPublic);
 
         return playlist;
     }

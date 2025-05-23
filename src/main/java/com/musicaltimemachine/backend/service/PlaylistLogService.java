@@ -6,6 +6,7 @@ import com.musicaltimemachine.backend.entity.PlaylistLog;
 import com.musicaltimemachine.backend.repository.PlaylistLogRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,5 +42,13 @@ public class PlaylistLogService {
                 logsLast7Days.size(),
                 logEntries
         );
+    }
+
+    public void saveLog(LocalDate chartDate, boolean isPublic) {
+        PlaylistLog log = new PlaylistLog();
+        log.setCreatedAt(LocalDateTime.now());
+        log.setRequestedChartDate(chartDate);
+        log.setPublic(isPublic);
+        playlistLogRepository.save(log);
     }
 }
