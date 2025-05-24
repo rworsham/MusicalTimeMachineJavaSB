@@ -19,7 +19,7 @@ public class AdminLogController {
 
     @GetMapping("/logs")
     public ResponseEntity<PlaylistLogStatsDetail> playlistLogs() {
-        PlaylistLogStatsDetail playlistLogs = playlistLogService.getPlaylistLogsForToday();
+        PlaylistLogStatsDetail playlistLogs = playlistLogService.getPlaylistLogs();
         return ResponseEntity.ok(playlistLogs);
     }
 

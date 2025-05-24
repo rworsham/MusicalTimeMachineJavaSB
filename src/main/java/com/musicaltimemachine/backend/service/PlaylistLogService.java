@@ -19,17 +19,20 @@ public class PlaylistLogService {
         this.playlistLogRepository = playlistLogRepository;
     }
 
-    public PlaylistLogStatsDetail getPlaylistLogsForToday() {
+    public PlaylistLogStatsDetail getPlaylistLogs() {
         LocalDateTime now = LocalDateTime.now();
 
         LocalDateTime startOfLast24Hours = now.minusHours(24);
 
         LocalDateTime startOfLast7Days = now.minusDays(7);
 
+        LocalDateTime startOfLast30Days = now.minusDays(30);
+
         List<PlaylistLog> logsLast24Hours = playlistLogRepository.findByCreatedAtToday(startOfLast24Hours, now);
         List<PlaylistLog> logsLast7Days = playlistLogRepository.findByCreatedAtThisWeek(startOfLast7Days, now);
+        List<PlaylistLog> logsLast30Days = playlistLogRepository.findByCreatedAtThisMonth(startOfLast30Days, now);
 
-        List<PlaylistLogEntry> logEntries = logsLast7Days.stream()
+        List<PlaylistLogEntry> logEntries = logsLast30Days.stream()
                 .map(log -> new PlaylistLogEntry(
                         log.getCreatedAt().toString(),
                         log.getRequestedChartDate().toString(),
@@ -40,6 +43,7 @@ public class PlaylistLogService {
         return new PlaylistLogStatsDetail(
                 logsLast24Hours.size(),
                 logsLast7Days.size(),
+                logsLast30Days.size(),
                 logEntries
         );
     }

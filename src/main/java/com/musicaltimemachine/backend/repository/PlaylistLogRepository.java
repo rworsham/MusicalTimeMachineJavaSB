@@ -15,4 +15,7 @@ public interface PlaylistLogRepository extends JpaRepository<PlaylistLog, Long> 
 
     @Query("SELECT p FROM PlaylistLog p WHERE p.createdAt BETWEEN :startOfWeek AND :endOfWeek")
     List<PlaylistLog> findByCreatedAtThisWeek(LocalDateTime startOfWeek, LocalDateTime endOfWeek);
+
+    @Query("SELECT p FROM PlaylistLog p WHERE p.createdAt BETWEEN :startOfMonth AND :endOfMonth")
+    List<PlaylistLog> findByCreatedAtThisMonth(LocalDateTime startOfMonth, LocalDateTime endOfMonth);
 }
