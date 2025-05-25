@@ -39,10 +39,10 @@ public class DataSeederService {
 
     @Async
     public void runAsyncSeeding() {
-        seedBillboardData();
+        seedSongData();
     }
 
-    public void seedBillboardData() {
+    public void seedSongData() {
         LocalDate startDate = LocalDate.of(1959, 8, 3);
         LocalDate endDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

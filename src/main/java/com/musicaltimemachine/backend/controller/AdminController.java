@@ -1,9 +1,7 @@
 package com.musicaltimemachine.backend.controller;
 
 import com.musicaltimemachine.backend.dto.LoginRequest;
-import com.musicaltimemachine.backend.service.DataSeederService;
 import com.musicaltimemachine.backend.service.RecaptchaService;
-import com.musicaltimemachine.backend.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +19,10 @@ import java.util.Map;
 public class AdminController {
 
     private final AuthenticationManager authenticationManager;
-    private final DataSeederService dataSeederService;
     private final RecaptchaService recaptchaService;
 
-    public AdminController(AuthenticationManager authenticationManager,
-                           DataSeederService dataSeederService,
-                           RecaptchaService recaptchaService) {
+    public AdminController(AuthenticationManager authenticationManager, RecaptchaService recaptchaService) {
         this.authenticationManager = authenticationManager;
-        this.dataSeederService = dataSeederService;
         this.recaptchaService = recaptchaService;
     }
 
@@ -82,11 +76,5 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "User not authenticated"));
         }
-    }
-
-    @PostMapping("/seed-billboard")
-    public ResponseEntity<?> startBillboardSeeding() {
-        dataSeederService.runAsyncSeeding();
-        return ResponseEntity.ok(Map.of("message", "Seeding started check logs for progress"));
     }
 }
