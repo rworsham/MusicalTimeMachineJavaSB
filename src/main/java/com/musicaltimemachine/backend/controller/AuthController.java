@@ -50,7 +50,7 @@ public class AuthController {
         session.setAttribute("spotifyAccessToken", accessToken);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(java.net.URI.create("http://localhost:5173/timetravel"));
+        headers.setLocation(java.net.URI.create("https://www.musicaltimemachine/timetravel"));
         return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();
     }
 }
