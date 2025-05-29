@@ -53,4 +53,9 @@ public class AuthController {
         headers.setLocation(java.net.URI.create("https://www.musicaltimemachine.com/timetravel"));
         return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();
     }
+
+    @GetMapping("/csrf-token")
+    public ResponseEntity<?> getCsrfToken() {
+        return ResponseEntity.ok().build();
+    }
 }
