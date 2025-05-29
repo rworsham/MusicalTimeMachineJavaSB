@@ -1,6 +1,8 @@
 package com.musicaltimemachine.backend.controller;
 
 import com.musicaltimemachine.backend.service.SpotifyAuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,7 +57,13 @@ public class AuthController {
     }
 
     @GetMapping("/csrf-token")
-    public ResponseEntity<?> getCsrfToken() {
+    public ResponseEntity<Void> getCsrfToken(HttpServletRequest request) {
+        CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
         return ResponseEntity.ok().build();
     }
 }

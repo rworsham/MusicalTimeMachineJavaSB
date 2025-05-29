@@ -57,7 +57,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/api/admin/login", "/api/admin/me", "/api/admin/logout", "/api/auth/**", "/api/playlist", "/api/contact").permitAll()
+                                .requestMatchers("/api/admin/login", "/api/admin/me", "/api/admin/logout", "/api/auth/login", "/api/auth/callback", "/api/playlist", "/api/contact").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .logout(logout -> logout.permitAll());
