@@ -44,18 +44,23 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
+        CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+
+        csrfTokenRepository.setCookieCustomizer(cookieBuilder ->
+                cookieBuilder.domain(".musicaltimemachine.com")
+        );
+
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRepository(csrfTokenRepository)
                 )
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/api/admin/login", "/api/admin/logout", "/api/auth/**", "/api/playlist", "/api/contact").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .logout(LogoutConfigurer::permitAll
-                );
+                .logout(logout -> logout.permitAll());
 
         return http.build();
     }
