@@ -4,10 +4,9 @@ import com.musicaltimemachine.backend.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +15,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final UserService userService;
@@ -46,9 +46,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
         CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
 
-        csrfTokenRepository.setCookieCustomizer(cookieBuilder ->
-                cookieBuilder.domain(".musicaltimemachine.com")
-        );
+        csrfTokenRepository.setCookieCustomizer(cookieBuilder -> {
+                cookieBuilder.domain(".musicaltimemachine.com");
+                cookieBuilder.secure(true);
+                cookieBuilder.sameSite("None");
+
+        });
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
