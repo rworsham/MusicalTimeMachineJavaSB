@@ -60,6 +60,8 @@ public class AuthController {
     public ResponseEntity<Void> getCsrfToken(HttpServletRequest request) {
         CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
 
+        request.getSession();
+
         if (token == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
