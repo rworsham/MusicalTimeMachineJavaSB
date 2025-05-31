@@ -69,7 +69,7 @@ public class SecurityConfig {
         CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
 
         csrfTokenRepository.setCookieCustomizer(cookieBuilder -> {
-                cookieBuilder.domain(".musicaltimemachine.com");
+                cookieBuilder.domain("musicaltimemachine.com");
                 cookieBuilder.secure(true);
                 cookieBuilder.sameSite("None");
 
